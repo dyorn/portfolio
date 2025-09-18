@@ -9,8 +9,8 @@ import ArtboardPreview from '../components/ArtboardPreview'
 import PhotoCollectionPreview from '../components/PhotoCollectionPreview'
 
 const Index = ({ data }) => {
-  const artboards = data.allMarkdownRemark.edges
-  const photoCollections = data.allContentfulPhotoCollection.edges
+  const artboards = data.artboards.edges
+  const photoCollections = data.photoCollections.edges
   const youtubeVideos = data.allYoutubeVideo.edges
   const githubRepos = data.githubData.data.viewer.repositories.nodes
 
@@ -124,6 +124,7 @@ const Index = ({ data }) => {
                 slug={artboard.frontmatter.slug}
                 title={artboard.frontmatter.title}
                 image={artboard.frontmatter.artboard}
+                artboardMetadata={artboard.frontmatter.artboardMetadata}
                 key={artboard.frontmatter.title}
               />
             )
@@ -136,12 +137,17 @@ const Index = ({ data }) => {
           </div>
 
           {photoCollections.map(({ node: photoCollection }) => {
+            const { title, slug, featuredImage, featuredImageMetadata } =
+              photoCollection.frontmatter
+            const image = `photo_collections/${slug}/${featuredImage}.jpg`
+
             return (
               <PhotoCollectionPreview
-                slug={photoCollection.slug}
-                title={photoCollection.title}
-                image={photoCollection.featuredImage.gatsbyImageData}
-                key={photoCollection.title}
+                slug={slug}
+                title={title}
+                image={image}
+                imageMetadata={featuredImageMetadata}
+                key={title}
               />
             )
           })}
@@ -200,7 +206,7 @@ export default Index
 
 export const query = graphql`
   query Index {
-    allMarkdownRemark(
+    artboards: allMarkdownRemark(
       filter: { frontmatter: { type: { eq: "artboard" } } }
       limit: 2
       sort: { fields: [frontmatter___artboardDate], order: DESC }
@@ -211,29 +217,30 @@ export const query = graphql`
             title
             slug
             artboard
+            artboardMetadata {
+              aspectRatio
+              dominantColor
+            }
           }
         }
       }
     }
-    allContentfulPhotoCollection(
+    photoCollections: allMarkdownRemark(
+      filter: { frontmatter: { type: { eq: "photo-collection" } } }
       limit: 6
-      sort: { fields: collectionDate, order: DESC }
+      sort: { fields: [frontmatter___collectionDate], order: DESC }
     ) {
       edges {
         node {
-          title
-          slug
-          featuredImage {
-            gatsbyImageData(layout: CONSTRAINED, width: 520)
+          frontmatter {
+            title
+            slug
+            featuredImage
+            featuredImageMetadata {
+              aspectRatio
+              dominantColor
+            }
           }
-        }
-      }
-    }
-    allContentfulWriting(limit: 4, sort: { fields: writingDate, order: DESC }) {
-      edges {
-        node {
-          title
-          slug
         }
       }
     }

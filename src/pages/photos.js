@@ -7,8 +7,8 @@ import ArtboardPreview from '../components/ArtboardPreview'
 import PhotoCollectionPreview from '../components/PhotoCollectionPreview'
 
 const Photos = ({ data }) => {
-  const artboards = data.allMarkdownRemark.edges
-  const photoCollections = data.allContentfulPhotoCollection.edges
+  const artboards = data.artboards.edges
+  const photoCollections = data.photoCollections.edges
 
   return (
     <Layout>
@@ -23,12 +23,17 @@ const Photos = ({ data }) => {
           </div>
 
           {photoCollections.map(({ node: photoCollection }) => {
+            const { title, slug, featuredImage, featuredImageMetadata } =
+              photoCollection.frontmatter
+            const image = `photo_collections/${slug}/${featuredImage}.jpg`
+
             return (
               <PhotoCollectionPreview
-                slug={photoCollection.slug}
-                title={photoCollection.title}
-                image={photoCollection.featuredImage.gatsbyImageData}
-                key={photoCollection.title}
+                slug={slug}
+                title={title}
+                image={image}
+                imageMetadata={featuredImageMetadata}
+                key={title}
               />
             )
           })}
@@ -45,6 +50,7 @@ const Photos = ({ data }) => {
                 slug={artboard.frontmatter.slug}
                 title={artboard.frontmatter.title}
                 image={artboard.frontmatter.artboard}
+                artboardMetadata={artboard.frontmatter.artboardMetadata}
                 key={artboard.frontmatter.title}
               />
             )
@@ -59,7 +65,7 @@ export default Photos
 
 export const query = graphql`
   query Photos {
-    allMarkdownRemark(
+    artboards: allMarkdownRemark(
       filter: { frontmatter: { type: { eq: "artboard" } } }
       sort: { fields: [frontmatter___artboardDate], order: DESC }
     ) {
@@ -69,19 +75,28 @@ export const query = graphql`
             title
             slug
             artboard
+            artboardMetadata {
+              aspectRatio
+              dominantColor
+            }
           }
         }
       }
     }
-    allContentfulPhotoCollection(
-      sort: { fields: collectionDate, order: DESC }
+    photoCollections: allMarkdownRemark(
+      filter: { frontmatter: { type: { eq: "photo-collection" } } }
+      sort: { fields: [frontmatter___collectionDate], order: DESC }
     ) {
       edges {
         node {
-          title
-          slug
-          featuredImage {
-            gatsbyImageData(layout: CONSTRAINED, width: 360)
+          frontmatter {
+            title
+            slug
+            featuredImage
+            featuredImageMetadata {
+              aspectRatio
+              dominantColor
+            }
           }
         }
       }
