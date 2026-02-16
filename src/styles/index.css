@@ -91,17 +91,18 @@ body, html {
 }
 
 .markdown-content img {
-  @apply mx-auto my-2  max-w-xl rounded object-contain;
+  @apply rounded object-contain;
   box-shadow: none !important;
 }
 
 .markdown-content .gatsby-resp-image-wrapper {
-  @apply mx-auto my-2 max-w-xl rounded object-contain;
+  @apply rounded;
   box-shadow: none !important;
 }
 
 .markdown-content .gatsby-resp-image-figure {
-  @apply mx-auto my-2 max-w-xl object-contain rounded;
+  @apply mx-auto my-4 rounded;
+  max-width: 28rem;
   box-shadow: none !important;
 }
 
